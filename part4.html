@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>Tux Mind Math</title>
+	<script src="phaser-2.0.6.min.js"></script>
+	<script src='https://code.responsivevoice.org/responsivevoice.js'></script>
+    <style type="text/css">
+
+		body {
+            margin: 0;
+			background-color: black;
+
+        }
+
+
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(1366, 768, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+function preload() {
+
+	game.load.image('layer1', 'assets/layer1.png');
+	game.load.image('layer2', 'assets/layer2.png');
+	game.load.image('layer3', 'assets/layer3.png');
+	game.load.image('layer4', 'assets/layer4.png');
+	game.load.image('tree', 'assets/tree.png');
+	game.load.image('mul', 'assets/mul.png');
+	this.load.image('ques', 'assets/ques.png');
+	game.load.image('board', 'assets/skate.png');
+	game.load.image('bullet', 'assets/bullet.png');
+	//game.load.image('player', 'assets/pingu.png');
+	game.load.image('dialog', 'assets/dialog.png');
+	game.load.image('star', 'assets/star.png');
+	game.load.image('counter', 'assets/counter.png');
+	game.load.image('text', 'assets/text.png');
+	game.load.image('pickup', 'assets/pickup.png')
+	game.load.image('ques', 'assets/ques.png')
+	game.load.image('equal', 'assets/equal.png')
+	game.load.image('resume' , 'assets/resume.png');
+	game.load.image('pause' , 'assets/pause.png');
+	game.load.spritesheet('blast', 'assets/blast.png',201,201);
+	game.load.spritesheet("enemy", "assets/enemy.png",949, 688);
+	game.load.spritesheet("block1", "assets/52.png",128, 64);
+	game.load.spritesheet("block2", "assets/1.png",128, 64);
+	game.load.spritesheet("block3", "assets/572.png",192, 64);
+	game.load.image('block4' , 'assets/7.png');
+
+	game.load.spritesheet("player", "assets/tank.png",256 ,175);
+	game.load.audio('sound1', 'sounds/sound1.mp3');
+	game.load.audio('sound2', 'sounds/sound2.mp3');
+
+
+}
+var platforms;
+var score;
+var sound1;
+var sound2
+var set;
+var on;
+var register;
+
+
+
+function create() {
+
+	this.input.maxPointers = 1;
+    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+	this.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+    this.scale.pageAlignHorizontally = true;
+    this.scale.pageAlignVertically = true;
+    this.scale.setScreenSize(true);
+
+	game.input.onDown.add(gofull, this);
+
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+
+	score = 0;
+	set=true;
+	on=true;
+	register = false;
+
+	game.add.sprite(0, 0,'layer1');
+	game.add.sprite(0, 0,'layer2');
+
+	sound1 = game.add.audio('sound1');
+	sound2 = game.add.audio('sound2');
+
+	counter = game.add.sprite(60, 42,'counter');
+	counter.scale.setTo(0.28,0.35);
+
+	star = game.add.sprite(35, 35,'star');
+	star.scale.setTo(0.35,0.34);
+
+	pause= game.add.sprite(1366-100, 25,'pause');
+	pause.scale.setTo(0.5,0.5);
+	pause.inputEnabled = true;
+
+
+	tree1 = game.add.sprite(1000,game.world.height-92-310,'tree');
+	tree2 = game.add.sprite(850,game.world.height-92-250,'tree');
+	tree1.scale.setTo(0.65,0.65);
+	tree2.scale.setTo(0.65,0.62);
+
+	platforms = game.add.group();
+    platforms.enableBody = true;
+    var ground = platforms.create(0, game.world.height - 92, 'layer4');
+    ground.body.immovable = true;
+
+    player = game.add.sprite(200,game.world.height-200,'player');
+	player.scale.setTo(0.52,0.5);
+	game.physics.arcade.enable(player);
+    player.body.gravity.y = 300;
+    player.body.collideWorldBounds = false;
+	player.body.velocity.x=0;
+	player.animations.add('right', [0,1,2], 10, true);
+
+
+	scoreText = game.add.text(115, 50, score.toString(), { fontSize: '45px', fill: '#000' });
+
+	block1 = game.add.sprite(1366-210, game.world.height - 510, 'block1');
+    game.physics.arcade.enable(block1);
+    block1.body.gravity.y = 0;
+    block1.body.collideWorldBounds = false;
+
+	block1.scale.setTo(0.8,0.8);
+	block1.body.velocity.x = -70;
+
+
+
+	blockm = game.add.sprite(1366-210+block1.width-10, game.world.height - 510-7, 'mul');
+    game.physics.arcade.enable(blockm);
+    blockm.body.gravity.y = 0;
+    blockm.body.collideWorldBounds = false;
+
+
+	blockm.scale.setTo(0.28,0.28);
+	blockm.body.velocity.x = -70;
+
+
+
+	block2 = game.add.sprite(1366-210+block1.width+blockm.width-22, game.world.height - 510, 'block2');
+    game.physics.arcade.enable(block2);
+    block2.body.gravity.y = 0;
+    block2.body.collideWorldBounds = false;
+
+	block2.scale.setTo(0.8,0.8);
+	block2.body.velocity.x = -70;
+
+
+
+	blocke = game.add.sprite(1366-150+block1.width*2-6, game.world.height - 510+5, 'equal');
+	game.physics.arcade.enable(blocke);
+	blocke.body.gravity.y = 0;
+	blocke.body.collideWorldBounds = false;
+
+
+	blocke.scale.setTo(0.7,0.7);
+	blocke.body.velocity.x = -70;
+
+	block4 = game.add.sprite(1500, game.world.height - 64, 'block4');
+    game.physics.arcade.enable(block4);
+    block4.body.gravity.y = 0;
+    block4.body.collideWorldBounds = false;
+
+	block4.scale.setTo(0.8,0.8);
+	block4.body.velocity.x = 0
+
+	block3 = game.add.sprite(1366-210+block1.width*3, game.world.height - 510, 'block3');
+    game.physics.arcade.enable(block3);
+    block3.body.gravity.y = 0;
+    block3.body.collideWorldBounds = false;
+
+	block3.scale.setTo(0.8,0.8);
+	block3.body.velocity.x = -70;
+
+
+
+
+
+	enemy1 = game.add.sprite(1366, game.world.height - 550, 'enemy');
+    game.physics.arcade.enable(enemy1);
+    enemy1.body.gravity.y = 0;
+    enemy1.body.collideWorldBounds = false;
+
+
+    enemy1.animations.add('right', [0, 1, 2], 8, true);
+    enemy1.anchor.setTo(0.5,0.5);
+	enemy1.scale.setTo(0.12,0.12);
+	enemy1.scale.x *= -1;
+	enemy1.body.velocity.x = -70;
+
+
+
+
+	game.scale.startFullScreen(true);
+
+
+
+}
+
+
+function update() {
+
+	pause.events.onInputDown.add(pauseAndPlay);
+    game.input.onDown.add(unpause, self);
+
+ 	game.physics.arcade.collide(player,platforms);
+
+	if (on==true) {
+
+	game.physics.arcade.collide(block4, platforms,triggerMethod,null,this);
+	game.physics.arcade.overlap(block4, player, finishMethod, null, this);
+
+	}
+
+
+	enemy1.animations.play('right');
+	enemy1.body.velocity.x = -70;
+
+	if (set==true && block3.position.x+110<game.world.bounds.right &&  block3.position.x+70>game.world.bounds.left )
+	{
+		register=true;
+	}
+
+	else {
+		register=false;
+	}
+
+	if (enemy1.position.x<game.world.bounds.left+enemy1.width*4)
+	{
+
+		if (set==true){
+		enemy1.position.x = 1366+300;
+		block1.position.x = 1366-210+300;
+		block2.position.x = 1366-210+block1.width+blockm.width-22+300;
+		block3.position.x = 1366-210+block1.width*3+300;
+		blockm.position.x = 1366-210+block1.width-10+300;
+		blocke.position.x = 1366-150+block1.width*2-6+300;
+		}
+
+	}
+
+	if (game.input.keyboard.isDown(Phaser.Keyboard.SEVEN) && register==true)
+	{	if (set==true) {
+		set=false;
+		block3.frame=1;
+		sound1.play();
+		block4.position.x = block3.position.x+block3.width/3;
+		block4.position.y = block3.position.y;
+		block3.kill()
+		block2.kill()
+		block1.kill()
+		blocke.kill()
+		blockm.kill()
+
+		block4.body.gravity.y =150;
+		block4.body.velocity.x=0
+
+
+	}
+
+	}
+
+}
+
+function gofull() {
+
+        game.scale.startFullScreen(false);
+
+}
+
+function triggerMethod()
+{
+
+
+player.animations.play("right");
+
+if (block4.position.x>player.position.x)
+player.body.velocity.x=130;
+
+else
+player.body.velocity.x=-130;
+
+
+}
+
+
+function finishMethod () {
+
+	sound2.play();
+	score = 10;
+	on=false;
+	scoreText.setText(score.toString());
+	block4.kill();
+	player.animations.stop();
+	player.body.velocity.x=0;
+
+	dialog = game.add.sprite(1366/2-250, 250,'dialog');
+	dialog.scale.setTo(0.5,0.5);
+	quesText = game.add.text(game.world.centerX-145, game.world.height/2.34, " Congrats! you gave the \nright answer."
+	, { fontSize: '45px', fill: '#000', align:"center" });
+	responsiveVoice.speak('Congrats, you gave the write answer!');
+
+
+}
+
+
+function pauseAndPlay() {
+	game.paused=true;
+    resume = game.add.sprite(1366/2, 768/2, 'resume');
+    resume.scale.setTo(0.5,0.5);
+    resume.anchor.setTo(0.5, 0.5);
+    pause.destroy();
+
+
+
+}
+
+function unpause(event) {
+    if (game.paused) {
+
+        var x1 = 1366/2-resume.width/2, x2 = 1366/2+resume.width/2,
+            y1 = 768/2-resume.height/2, y2 = 768/2+resume.height/2;
+
+        if(event.x > x1 && event.x < x2 && event.y > y1 && event.y < y2 ){
+
+        game.paused=false;
+        resume.destroy();
+        pause = game.add.sprite(1366-100, 25,'pause');
+        pause.scale.setTo(0.5,0.5);
+    	pause.inputEnabled = true;
+
+        }
+
+    }
+
+}
+
+
+</script>
+
+</body>
+</html>
