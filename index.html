@@ -31,7 +31,8 @@ function preload() {
 	game.load.image('tree', 'assets/tree.png');
 	game.load.image('mul', 'assets/mul.png');
 	this.load.image('ques', 'assets/ques.png');
-	game.load.image('board', 'assets/skate.png');
+	game.load.image('skate', 'assets/roller.gif');
+	game.load.image('player','assets/tuxx.png');
 	game.load.image('bullet', 'assets/bullet.png');
 	//game.load.image('player', 'assets/pingu.png');
 	game.load.image('dialog', 'assets/dialog.png');
@@ -50,7 +51,7 @@ function preload() {
 	game.load.spritesheet("block3", "assets/572.png",192, 64);
 	game.load.image('block4' , 'assets/7.png');
 
-	game.load.spritesheet("player", "assets/tank.png",256 ,175);
+	//game.load.spritesheet("player", "assets/tank.png",256 ,175);
 	game.load.audio('sound1', 'sounds/sound1.mp3');
 	game.load.audio('sound2', 'sounds/sound2.mp3');
 
@@ -111,13 +112,20 @@ function create() {
     var ground = platforms.create(0, game.world.height - 92, 'layer4');
     ground.body.immovable = true;
 
-    player = game.add.sprite(200,game.world.height-200,'player');
-	player.scale.setTo(0.52,0.5);
+    player = game.add.sprite(250,game.world.height-300,'player');
+	//player.scale.setTo(0.52,0.5);
 	game.physics.arcade.enable(player);
     player.body.gravity.y = 300;
     player.body.collideWorldBounds = false;
 	player.body.velocity.x=0;
-	player.animations.add('right', [0,1,2], 10, true);
+	//player.animations.add('right', [0,1,2], 10, true);
+
+	skate = game.add.sprite(200,game.world.height-200,'skate');
+	//player.scale.setTo(0.52,0.5);
+	game.physics.arcade.enable(skate);
+    skate.body.gravity.y = 300;
+    skate.body.collideWorldBounds = false;
+	skate.body.velocity.x=0;
 
 
 	scoreText = game.add.text(115, 50, score.toString(), { fontSize: '45px', fill: '#000' });
@@ -210,11 +218,14 @@ function update() {
     game.input.onDown.add(unpause, self);
 
  	game.physics.arcade.collide(player,platforms);
+	game.physics.arcade.collide(skate,platforms);
+	game.physics.arcade.collide(player,skate);
 
 	if (on==true) {
 
 	game.physics.arcade.collide(block4, platforms,triggerMethod,null,this);
 	game.physics.arcade.overlap(block4, player, finishMethod, null, this);
+	game.physics.arcade.overlap(block4, skate, finishMethod, null, this);
 
 	}
 
@@ -278,14 +289,17 @@ function triggerMethod()
 {
 
 
-player.animations.play("right");
+//player.animations.play("right");
 
-if (block4.position.x>player.position.x)
-player.body.velocity.x=130;
+if (block4.position.x>player.position.x) {
+	player.body.velocity.x=150;
+	skate.body.velocity.x= 150;
+	}
 
-else
-player.body.velocity.x=-130;
-
+else {
+	player.body.velocity.x=-150;
+	skate.body.velocity.x=-150;
+	}
 
 }
 
@@ -297,8 +311,9 @@ function finishMethod () {
 	on=false;
 	scoreText.setText(score.toString());
 	block4.kill();
-	player.animations.stop();
+
 	player.body.velocity.x=0;
+	skate.body.velocity.x=0;
 
 	dialog = game.add.sprite(1366/2-250, 250,'dialog');
 	dialog.scale.setTo(0.5,0.5);
